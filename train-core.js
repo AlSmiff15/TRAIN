@@ -245,7 +245,7 @@ function handleCreateBlock(){
    const next=makeBlock();
    if(!next)throw Error('Please check the start date, running distance and training days above.');
    next.autoCreated=false;next.replacesBlockId=selectedBlock()?.id||null;
-   commitActiveBlock(next);
+   if(!commitActiveBlock(next))throw Error('Programme save did not complete');
    previewBlock=null;$('blockPreview').innerHTML='';
    if(feedback)feedback.textContent='New block saved and activated successfully.';
    renderBlocks();go('home');
@@ -256,7 +256,7 @@ function handleCreateBlock(){
    alert(message);
  }finally{button.disabled=false;button.textContent=originalLabel}
 }
-$('createBlock').addEventListener('click',handleCreateBlock);
+$('createBlock').addEventListener('click',handleCreateBlock);$('createBlock').dataset.handlerReady='yes';
 $('blockPreview').onclick=e=>{
  const log=e.target.closest('[data-blocklog]');
  if(log){resetForm();$('date').value=log.dataset.blocklog;go('log')}

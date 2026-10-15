@@ -26,3 +26,8 @@ Training Blocks → Create or replace your block → Save & activate new block. 
 
 ## Create button repair
 The Create button now gives visible progress, success, and actionable errors. It keeps the previous active block if saving fails. It also defaults replacement programmes to today rather than the end of the previous block. Verify on your iPhone after publishing; browser testing has not been completed.
+
+
+## Diagnostic update
+This release forces a new JavaScript URL to bypass old cached files and reports JavaScript startup errors beside the block save button. It does not erase saved training data.
+If Save & activate remains unresponsive, open Training Blocks and report any red or visible error text. If no error appears, verify that the deployed website is serving the updated `index.html` and `train-core.js` from the same directory. Do not clear Safari storage or uninstall the Home Screen app.
