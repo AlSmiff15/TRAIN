@@ -233,18 +233,20 @@ $('suggestBlock').onclick=()=>{suggestFields();$('blockPreview').innerHTML='<p c
 $('createBlock').onclick=()=>{
  const next=makeBlock();if(!next)return;
  const existing=selectedBlock();
- if(existing&&!confirm('Replace your active training programme? Your earlier block and workout history will remain saved.'))return;
+ // Explicit Create & Activate is permission to replace the current plan.
+ // Keep the previous plan in Saved blocks and retain workout history.
  next.autoCreated=false;
+ next.replacesBlockId=existing?.id||null;
  try{commitActiveBlock(next)}catch(err){alert('TRAIN could not save your block: '+err.message);return}
  previewBlock=null;$('blockPreview').innerHTML='';
  renderBlocks();go('home');
- if(!$('trainingToday').textContent.includes(blockTitle[next.focus]))alert('Your programme was saved, but the dashboard could not display it. Open Training Blocks to view the saved plan.');
+ if(db.settings.activeBlockId!==next.id)alert('TRAIN could not select the new programme. Open Training Blocks and activate it from Saved blocks.');
 };
 $('blockPreview').onclick=e=>{
  const log=e.target.closest('[data-blocklog]');
  if(log){resetForm();$('date').value=log.dataset.blocklog;go('log')}
 };
-$('blockArchive').onclick=e=>{const log=e.target.closest('[data-blocklog]');if(log){resetForm();$('date').value=log.dataset.blocklog;go('log');return}const btn=e.target.closest('[data-blockaction]');if(!btn)return;const b=db.blocks.find(x=>x.id===btn.dataset.id);if(!b)return;if(btn.dataset.blockaction==='view'){const out=document.getElementById('weeks-'+b.id);out.classList.toggle('hidden');out.innerHTML=out.classList.contains('hidden')?'':b.weeks.map(w=>blockWeekHTML(w,b)).join('');return}if(btn.dataset.blockaction==='activate'){if(!confirm('Activate this block? Your previously active block will be marked finished.'))return;db.blocks.forEach(x=>{if(x.status==='active')x.status='finished'});b.status='active';db.settings.activeBlockId=b.id;if(persist()){renderBlocks();go('home')}}if(btn.dataset.blockaction==='finish'){if(!confirm('Mark this training block finished? You can then generate your next block.'))return;b.status='finished';if(db.settings.activeBlockId===b.id)db.settings.activeBlockId=null;if(persist()){renderBlocks();$('blockStart').value=blockDate(b.start,b.length*7)}}};
+$('blockArchive').onclick=e=>{const log=e.target.closest('[data-blocklog]');if(log){resetForm();$('date').value=log.dataset.blocklog;go('log');return}const btn=e.target.closest('[data-blockaction]');if(!btn)return;const b=db.blocks.find(x=>x.id===btn.dataset.id);if(!b)return;if(btn.dataset.blockaction==='view'){const out=document.getElementById('weeks-'+b.id);out.classList.toggle('hidden');out.innerHTML=out.classList.contains('hidden')?'':b.weeks.map(w=>blockWeekHTML(w,b)).join('');return}if(btn.dataset.blockaction==='activate'){if(!confirm('Activate this block? Your previously active block will be marked finished.'))return;const snapshot=JSON.stringify(db);db.blocks.forEach(x=>{if(x.status==='active')x.status='finished'});b.status='active';db.settings.activeBlockId=b.id;if(persist()){renderBlocks();go('home')}else db=JSON.parse(snapshot)}if(btn.dataset.blockaction==='finish'){if(!confirm('Mark this training block finished? You can then generate your next block.'))return;b.status='finished';if(db.settings.activeBlockId===b.id)db.settings.activeBlockId=null;if(persist()){renderBlocks();$('blockStart').value=blockDate(b.start,b.length*7)}}};
 $('activeBlock').onclick=e=>{const btn=e.target.closest('[data-blockaction="view"]');if(!btn)return;const b=db.blocks.find(x=>x.id===btn.dataset.id&&Array.isArray(x.weeks));const el=document.getElementById('active-schedule');if(!b||!el){alert('This block has no saved schedule. Try restoring an earlier TRAIN backup.');return}const opening=el.classList.contains('hidden');el.classList.toggle('hidden',!opening);el.innerHTML=opening?b.weeks.map(w=>blockWeekHTML(w,b)).join(''):'';btn.textContent=opening?'Hide full schedule':`View all ${b.length} weeks`;if(opening)el.scrollIntoView({behavior:'smooth',block:'start'})};
 
 
