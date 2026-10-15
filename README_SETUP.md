@@ -22,3 +22,7 @@ the app cannot reconstruct its exact original sessions.
 
 ## Replacing an active programme
 Training Blocks → Create or replace your block → Save & activate new block. The previous active programme is moved to Saved blocks with status finished. Workouts and unfinished sessions are retained. You can reactivate an archived block later. The replacement action no longer requires a separate confirmation dialogue, which could prevent saving on some devices. Export an encrypted backup before updating.
+
+
+## Create button repair
+The Create button now gives visible progress, success, and actionable errors. It keeps the previous active block if saving fails. It also defaults replacement programmes to today rather than the end of the previous block. Verify on your iPhone after publishing; browser testing has not been completed.

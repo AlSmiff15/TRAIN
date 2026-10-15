@@ -36,7 +36,7 @@ const blockDate=(str,offset)=>{const d=new Date(str+'T12:00:00');d.setDate(d.get
 const weekIndex=(start,date)=>Math.floor((Date.parse(date+'T12:00:00')-Date.parse(start+'T12:00:00'))/604800000);
 const blockTitle={hybrid:'Hybrid running & strength',endurance:'Endurance / half Ironman',running:'Running performance',strength:'Strength & muscle'};
 function recentRun(){const cutoff=blockDate(today(),-28);const runs=db.workouts.filter(w=>w.type==='Run'&&w.date>=cutoff&&w.date<=today()&&Number(w.distance)>0);const weeks=new Set(runs.map(w=>weekIndex(cutoff,w.date)));const sum=runs.reduce((a,w)=>a+Number(w.distance||0),0);return runs.length?Math.round(sum/Math.max(1,Math.min(4,weeks.size))*2)/2:Math.max(0,Number(db.settings.runTarget)||0)}
-function suggestFields(){const active=(db.blocks||[]).filter(b=>b.status==='active').sort((a,b)=>b.start.localeCompare(a.start))[0];$('blockStart').value=active?blockDate(active.start,active.length*7):today();$('blockRun').value=recentRun();const f=$('blockFocus').value;$('blockStrength').value=f==='strength'?'3':f==='running'?'2':f==='endurance'?'2':'2';}
+function suggestFields(){const active=(db.blocks||[]).filter(b=>b.status==='active').sort((a,b)=>b.start.localeCompare(a.start))[0];$('blockStart').value=today();$('blockRun').value=recentRun();const f=$('blockFocus').value;$('blockStrength').value=f==='strength'?'3':f==='running'?'2':f==='endurance'?'2':'2';}
 // Fixed exercise templates: generated locally, without transmitting health information.
 const EXERCISE_LIBRARY={
  full:{squat:['Goblet squat','Back squat'],hinge:['Romanian deadlift','Trap bar deadlift'],push:['Dumbbell bench press','Barbell bench press'],pull:['Seated cable row','Chest supported row'],vertical:['Lat pulldown','Assisted pull up'],shoulder:['Dumbbell shoulder press','Machine shoulder press'],single:['Reverse lunge','Split squat'],ham:['Seated leg curl','Lying leg curl'],quad:['Leg press','Leg extension'],calf:['Standing calf raise','Seated calf raise'],arm:['Cable triceps pressdown','Dumbbell curl'],core:['Dead bug','Pallof press']},
@@ -230,18 +230,33 @@ document.addEventListener('click',e=>{const btn=e.target.closest('[data-runlog]'
 document.addEventListener('click',e=>{const btn=e.target.closest('[data-planlog]');if(!btn)return;const block=[previewBlock,...(db.blocks||[])].find(b=>b&&b.id===btn.dataset.planid);const w=block?.weeks?.find(w=>w.index===Number(btn.dataset.planweek));const session=w?.sessions?.[Number(btn.dataset.plansession)];if(session?.type==='Strength'&&session.exercises?.length){e.stopPropagation();prescribedLog(session,btn.dataset.planlog);}},true);
 $('suggestBlock').onclick=()=>{suggestFields();$('blockPreview').innerHTML='<p class="notice">Starting values updated from your workout history. Press Preview block to generate the schedule.</p>'};
 // New programmes are saved immediately, never left as unsaved drafts.
-$('createBlock').onclick=()=>{
- const next=makeBlock();if(!next)return;
- const existing=selectedBlock();
- // Explicit Create & Activate is permission to replace the current plan.
- // Keep the previous plan in Saved blocks and retain workout history.
- next.autoCreated=false;
- next.replacesBlockId=existing?.id||null;
- try{commitActiveBlock(next)}catch(err){alert('TRAIN could not save your block: '+err.message);return}
- previewBlock=null;$('blockPreview').innerHTML='';
- renderBlocks();go('home');
- if(db.settings.activeBlockId!==next.id)alert('TRAIN could not select the new programme. Open Training Blocks and activate it from Saved blocks.');
-};
+// Register after page load; always show an outcome and preserve previous blocks on failure.
+function handleCreateBlock(){
+ const button=$('createBlock');const feedback=$('blockSaveFeedback');
+ if(button.disabled)return;
+ const originalLabel=button.textContent;
+ button.disabled=true;button.textContent='Creating programme…';
+ if(feedback){feedback.hidden=false;feedback.textContent='Generating and saving your new programme…'}
+ try{
+   // Replacing a block starts now, not after the previous block's end date.
+   if(!$('blockStart').value)$('blockStart').value=today();
+   const days=Number($('blockDays').value),strength=Number($('blockStrength').value);
+   if(strength>days)throw Error('Strength sessions cannot exceed training days. Reduce strength sessions or increase training days.');
+   const next=makeBlock();
+   if(!next)throw Error('Please check the start date, running distance and training days above.');
+   next.autoCreated=false;next.replacesBlockId=selectedBlock()?.id||null;
+   commitActiveBlock(next);
+   previewBlock=null;$('blockPreview').innerHTML='';
+   if(feedback)feedback.textContent='New block saved and activated successfully.';
+   renderBlocks();go('home');
+ }catch(err){
+   console.error('TRAIN create block failed:',err);
+   const message='Could not create block: '+(err?.message||String(err));
+   if(feedback)feedback.textContent=message;
+   alert(message);
+ }finally{button.disabled=false;button.textContent=originalLabel}
+}
+$('createBlock').addEventListener('click',handleCreateBlock);
 $('blockPreview').onclick=e=>{
  const log=e.target.closest('[data-blocklog]');
  if(log){resetForm();$('date').value=log.dataset.blocklog;go('log')}
