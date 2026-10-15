@@ -334,10 +334,9 @@ function renderDashboardEditor(){
  });
 }
 applyDashboardLayout();
-})();
 
 // Morning self-report: nonvalidated, conservative decision support. Missing optional HR is not penalised.
-const morningFor=date=>(db.mornings||[]).find(x=>x.date===date);
+function morningFor(date){return (db.mornings||[]).find(x=>x.date===date)}
 function morningAssessment(m){
  const reasons=[];let level=0;
  const flag=(n,t)=>{if(n){level=Math.max(level,t);reasons.push(n)}};
@@ -375,3 +374,5 @@ $('morningHistory').onclick=e=>{const btn=e.target.closest('[data-morning-date]'
 $('morningForm').addEventListener('submit',e=>{e.preventDefault();const date=$('morningDate').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||date>today()){alert('Choose today or a past date.');return}const read=id=>Number($(id).value);const sh=$('morningSleepHours').value.trim(),hr=$('morningRhr').value.trim();const m={date,sleep:read('morningSleep'),energy:read('morningEnergy'),soreness:read('morningSoreness'),fatigue:read('morningFatigue'),mood:read('morningMood'),pain:read('morningPain'),sleepHours:sh===''?null:Number(sh),rhr:hr===''?null:Number(hr),ill:$('morningIll').value,notes:$('morningNotes').value.trim().slice(0,1500)};if((m.sleepHours!==null&&(!Number.isFinite(m.sleepHours)||m.sleepHours<0||m.sleepHours>24))||(m.rhr!==null&&(!Number.isFinite(m.rhr)||m.rhr<30||m.rhr>220))){alert('Please check sleep hours and resting heart rate.');return}const prev=(db.mornings||[]).findIndex(x=>x.date===date);if(prev<0)db.mornings.push(m);else db.mornings[prev]=m;if(!persist())return;const a=morningAssessment(m);$('morningResult').innerHTML=`<div class="recoveryStatus ${a.level>=2?'stop':a.level===1?'caution':''}"><strong>${safe(a.label)}</strong><p>${safe(a.message)}</p><p class="small muted">${safe(a.reasons.join('; ')||'No major concerns reported')}</p>${a.heartNote?`<p class="small muted">${safe(a.heartNote)}</p>`:''}<p class="checkhelp">This checklist is not a validated medical or overtraining prediction tool. Do not use it to override symptoms or clinical advice.</p><button class="btn secondary" id="morningDone" type="button">Dashboard</button></div>`;$('morningDone').onclick=()=>go('home');renderMorningHistory()});
 $('progress').addEventListener('click',e=>{if(e.target.closest('[data-go="morning"]'))go('morning')});
 $('blocks').addEventListener('click',e=>{if(e.target.closest('[data-go="morning"]'))go('morning')});
+
+})();

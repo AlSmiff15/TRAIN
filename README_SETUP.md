@@ -31,3 +31,14 @@ The Create button now gives visible progress, success, and actionable errors. It
 ## Diagnostic update
 This release forces a new JavaScript URL to bypass old cached files and reports JavaScript startup errors beside the block save button. It does not erase saved training data.
 If Save & activate remains unresponsive, open Training Blocks and report any red or visible error text. If no error appears, verify that the deployed website is serving the updated `index.html` and `train-core.js` from the same directory. Do not clear Safari storage or uninstall the Home Screen app.
+
+
+## Critical block saving repair (v10)
+The morning readiness functions were accidentally placed outside TRAIN's main app
+scope, while the programme renderer tried to call `morningFor` before it was
+initialised. This caused `Cannot access 'morningFor' before initialization`
+and prevented block creation. All readiness functions now share the app scope,
+and `morningFor` is declared as a hoisted function.
+The update preserves the existing `train_tracker_v1` storage key and does not
+delete or migrate saved data. Back up your data before updating. Upload all files
+to the same GitHub Pages location and reopen Safari to load the new cache.
