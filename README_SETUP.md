@@ -42,3 +42,15 @@ and `morningFor` is declared as a hoisted function.
 The update preserves the existing `train_tracker_v1` storage key and does not
 delete or migrate saved data. Back up your data before updating. Upload all files
 to the same GitHub Pages location and reopen Safari to load the new cache.
+
+
+## Workout timer update
+Live strength sessions now display an HH:MM:SS active-workout timer.
+Save & leave pauses time; reopening resumes. Finished workouts use active
+elapsed time instead of rounding the wall-clock start/end difference.
+A per-exercise rest countdown starts when a set is checked complete, with
+Restart and Skip controls. Countdown deadlines use absolute timestamps so
+they keep accurate time when iOS suspends the app. iOS may suppress vibration
+while TRAIN is in the background; return to TRAIN to view the countdown.
+Run sessions still support manually entered duration. Existing workout history
+is unchanged. This does not retroactively repair incorrect historic durations.
