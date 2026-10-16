@@ -73,7 +73,7 @@
 <script>
 window.addEventListener('error',function(e){var n=document.getElementById('blockSaveFeedback');if(n){n.hidden=false;n.textContent='TRAIN startup error: '+(e.message||'Unknown error')+' (line '+(e.lineno||'?')+'). Please report this message.';}},true);
 window.addEventListener('unhandledrejection',function(e){var n=document.getElementById('blockSaveFeedback');if(n){n.hidden=false;n.textContent='TRAIN background error: '+String(e.reason?.message||e.reason||'Unknown');}},true);
-</script><script src="./train-demos.js?v=20261016-11" defer></script><script src="./train-core.js?v=20261016-11" defer></script>
+</script><script src="./train-demos.js?v=20261016-12" defer></script><script src="./train-core.js?v=20261016-12" defer></script>
 <script>
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));

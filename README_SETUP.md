@@ -54,3 +54,7 @@ they keep accurate time when iOS suspends the app. iOS may suppress vibration
 while TRAIN is in the background; return to TRAIN to view the countdown.
 Run sessions still support manually entered duration. Existing workout history
 is unchanged. This does not retroactively repair incorrect historic durations.
+
+
+## Delete blocks
+Training Blocks → Saved blocks → Delete block. Confirmation required. Completed workout history is retained. Deleting an active block does not automatically generate another. Back up first.
