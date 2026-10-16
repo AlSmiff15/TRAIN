@@ -58,3 +58,10 @@ is unchanged. This does not retroactively repair incorrect historic durations.
 
 ## Delete blocks
 Training Blocks → Saved blocks → Delete block. Confirmation required. Completed workout history is retained. Deleting an active block does not automatically generate another. Back up first.
+
+
+## Weekly minutes accuracy
+Weekly minutes are calculated from the duration saved on each completed workout.
+Incorrect older entries must be corrected through History → Edit → Duration;
+TRAIN will not guess or overwrite historical times. Workout timer now pauses
+when leaving the live workout and on pagehide, to avoid counting inactive hours.
